@@ -1,0 +1,75 @@
+-- Settings
+local notificationDuration = 5 -- Duration each notification stays on screen
+local hoverDuration = 10 -- Duration to hover to each robbery location (in seconds)
+local robberyLocations = {
+    {name = "Bank Truck", alert = "A Bank Truck is now on the move!", position = Vector3.new(100, 50, 100)},
+    {name = "Cargo Plane", alert = "The Cargo Plane is ready for a heist!", position = Vector3.new(200, 50, 300)},
+    {name = "Crown Jewel", alert = "The Crown Jewel is up for grabs!", position = Vector3.new(-100, 50, 400)},
+    {name = "Donut Shop", alert = "Donut Shop robbery underway!", position = Vector3.new(-300, 50, -200)},
+    {name = "Gas Station", alert = "Gas Station is being robbed!", position = Vector3.new(150, 50, -100)},
+    {name = "Jewelry Store", alert = "Jewelry Store heist in progress!", position = Vector3.new(0, 50, 250)},
+    {name = "Mansion", alert = "The Mansion is open for high-stakes robbery!", position = Vector3.new(-250, 50, 250)},
+    {name = "Museum", alert = "The Museum is ready for a heist!", position = Vector3.new(300, 50, -300)},
+    {name = "Power Plant", alert = "The Power Plant puzzle heist is available!", position = Vector3.new(400, 50, 0)},
+    {name = "Rising City Bank", alert = "Rising City Bank is under attack!", position = Vector3.new(-400, 50, 100)},
+    {name = "Crater City Bank", alert = "Crater City Bank is being robbed!", position = Vector3.new(200, 50, -400)},
+    {name = "Tomb", alert = "The Tomb has been uncovered for treasure heist!", position = Vector3.new(0, 50, -500)},
+}
+
+-- Function to send notifications
+local function sendNotification(message)
+    -- Create a GUI notification
+    local screenGui = Instance.new("ScreenGui")
+    local textLabel = Instance.new("TextLabel")
+
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    screenGui.Name = "RobberyNotification"
+
+    textLabel.Size = UDim2.new(0.5, 0, 0.1, 0)
+    textLabel.Position = UDim2.new(0.25, 0, 0.1, 0)
+    textLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 24
+    textLabel.Text = message
+    textLabel.Parent = screenGui
+
+    wait(notificationDuration)
+    screenGui:Destroy()
+end
+
+-- Function to move the player to a position
+local function moveToPosition(player, targetPosition, duration)
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+    local start = character.HumanoidRootPart.Position
+    local elapsed = 0
+
+    while elapsed < duration do
+        elapsed = elapsed + game:GetService("RunService").Heartbeat:Wait()
+        local alpha = elapsed / duration
+        local newPosition = start:Lerp(targetPosition, alpha) -- Smoothly interpolate between start and target
+        character.HumanoidRootPart.CFrame = CFrame.new(newPosition) + Vector3.new(0, 10, 0) -- Add hover effect
+    end
+end
+
+-- Cycle through robbery notifications and hover the player
+local function startRobberyNotifications()
+    local player = game.Players.LocalPlayer
+
+    while true do
+        for _, location in ipairs(robberyLocations) do
+            -- Send notification
+            sendNotification(location.alert)
+
+            -- Move the player to the robbery location
+            moveToPosition(player, location.position, hoverDuration)
+
+            wait(5) -- Delay before the next notification
+        end
+    end
+end
+
+-- Start notifications
+startRobberyNotifications()
